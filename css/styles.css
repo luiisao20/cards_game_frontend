@@ -1,0 +1,122 @@
+:root{
+    --red: red;
+}
+body{
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    font-family: 'Zilla Slab', serif;
+    background-color: #607d8b;
+}
+header, footer{
+    opacity: 1;
+    width: 500px;
+    margin: 20px auto 20px auto;
+    font-size: 30px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+footer p{
+    text-align: center;
+    font-size: 18px;
+    font-weight: 200;
+    margin-left: auto;
+    margin-right: auto;
+}
+header img{
+    margin-left: 20px;
+    margin-right: 20px;
+    text-align: center;
+}
+header h1{
+    margin-left: auto;
+    margin-right: auto;
+}
+main{
+    text-align: center;
+    font-size: 24px;
+}
+form{
+    padding-top: 10px;
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+}
+label{
+    display: block;
+    margin-bottom: 10px;
+}
+input, select, submit{
+    font-family: 'Zilla Slab', serif;
+    display: inline;
+    background-color: #34515e;
+    color: white;
+    padding: 10px;
+    border: 2px solid #607d8b;
+    font-size: 18px;
+    border-radius: 10px;
+}
+select{
+    width: 300px;
+}
+/* Clases y Ids */
+.characterItem{
+    background-color: #34515e;
+    border: 1px solid white;
+    border-radius: 10px;
+    padding-top: 10px;
+    width: 70px;
+    height: 70px;
+}
+#at{
+    width: 20px;
+    border-radius: 10px 0 0 10px;
+}
+#userName{
+    border-radius: 0 10px 10px 0;
+    width: 230px;
+}
+#container{
+    align-items: center;
+}
+#characterContainer{
+    float: left;
+    width: 200px;
+    border: 2px solid white;
+    padding: 30px 10px;
+    margin-right: 10px;
+    margin-top: 30px;
+    border-radius: 10px;
+}
+#character p{
+    padding-top: auto;
+    padding-bottom: auto;
+}
+#characterGrid{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+#error{
+    right: 50%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    position: fixed;
+    opacity: 0;
+    width: 200px;
+    background-color: #34515e;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 18px;
+    color: var(--red);
+    font-weight: 200;
+    transition: opacity 0.3s ease;
+}
+#play{
+    width: 300px;
+    margin-bottom: 10px;
+}

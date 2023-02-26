@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link rel="stylesheet" href="./css/reset.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@300;500;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="./css/styles.css">
+        <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    </head>
+<body>
+    <header>
+        <div id="error" class="animate__animated ">
+            <p></p>
+        </div>
+        <img src="./img/FuriousGaming-VersionNegra.png" alt="logo" height="75px">
+        <h1>Héroes o villanos</h1>
+    </header>
+    <main>
+        <form action="./juego.html" id="formentrada">
+            <div class="itemForm">
+                <label for="userName">Introduce tu nick aquí</label>
+                <input type="text" name="userName" id="at" value="@" readonly>
+                <input type="text" name="userName" id="userName" required minlength="5">
+            </div>
+            <div class="itemForm">
+                <label for="dificulty">Dificultad del juego</label>
+                <select name="dificulty" id="dificulty">
+                    <option value="0">--Choose an option--</option>
+                    <option value="1">Baja</option>
+                    <option value="2">Media</option>
+                    <option value="3">Alta</option>
+                </select>
+            </div>
+            <div class="itemForm">
+                <label for="cards">Número de cartas</label>
+                <select name="cards" id="cards">
+                    <option value="0">--Choose an option--</option>
+                    <option value="3">3x3</option>
+                    <option value="4">4x4</option>
+                    <option value="5">5x5</option>
+                </select>
+            </div>
+            <div class="itemForm character">
+                <label for="character">Personaje</label>
+                <div id="characterContainer">
+                    <p>Arrastra aquí tu personaje elegido</p>
+                </div>
+                <div id="characterGrid">
+                    <div class="characterItem">
+                        <img src="./img/Naruto God.png" alt="characterImg" height="60px" draggable="true">
+                    </div>
+                    <div class="characterItem">
+                        <img src="./img/Hashirama.png" alt="characterImg" height="60px" draggable="true">
+                    </div>
+                    <div class="characterItem">
+                        <img src="./img/Madara.png" alt="characterImg" height="60px" draggable="true">
+                    </div>
+                    <div class="characterItem">
+                        <img src="./img/Kakashi.png" alt="characterImg" height="60px" draggable="true">
+                    </div>
+                    <div class="characterItem">
+                        <img src="./img/Zabuza.png" alt="characterImg" height="60px" draggable="true">
+                    </div>
+                    <div class="characterItem">
+                        <img src="./img/Jiraiya.png" alt="characterImg" height="60px" draggable="true">
+                    </div>
+                </div>
+            </div>
+            <div class="itemForm">
+                <input type="submit" value="Jugar" id="play">
+            </div>
+        </form>
+    </main>
+    <footer>
+        <p>Curso Frontend HTML, CSS Y JS</p>
+    </footer>
+    <script src="./js/app.js"></script>
+    <script src="./js/registro.js"></script>
+</body>
+</html>
