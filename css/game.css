@@ -1,0 +1,77 @@
+body{
+    background-color: #607d8b;
+    font-family: 'Zilla Slab', serif;
+}
+main{
+    display: flex;
+    margin: 30px auto 30px auto;
+    width: 800px;
+}
+footer{
+    margin: 30px auto 30px auto;
+    text-align: center;
+    width: 800px;
+}
+form{
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+label{
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+input{
+    display: inline;
+    font-family: 'Zilla Slab', serif;
+    width: 200px;
+    border: 1px solid #34515e;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: 200;
+    font-size: 18px;
+}
+/* Clases y Ids */
+.itemform{
+    align-items: center;
+}
+.containerItem{
+    display: flex;
+    background-color: #607d8b;
+    align-items: center;
+    justify-content: center;
+    min-width: 75px;
+    min-height: 75px;
+    border-radius: 5px;
+    margin: 5px;
+}
+#nameGame{
+    width: 500px;
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border: 2px solid white;
+    font-size: 20px;
+    border-radius: 0 0 10px 10px;
+    background-color: #34515e;
+}
+#game{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    justify-items: center;
+    align-items: center;
+    width: 500px;
+    min-height: 400px;
+    background-color: #fff;
+    border: 2px solid #34515e;
+    border-radius: 10px 10px 0 0;
+}
+#mainCharacter{
+    border: 2px solid white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}

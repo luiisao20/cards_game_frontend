@@ -4,11 +4,42 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Game</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/game.css">
+    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
 <body>
-    <h1>HOLA MUNDO</h1>
-    <img src="" alt="" id="hola">
+    <main>
+        <div id="panelGame">
+            <div id="game">
+                <!-- <div class="containerItem"><div class="item"></div></div> -->
+            </div>
+            <div id="gameHide">
+
+            </div>
+            <div id="nameGame">
+                <p>Naruto Cartas</p>
+            </div>
+        </div>
+        <div id="panelUser">
+            <form action="">
+                <div class="itemform">
+                    <img src="" alt="main" id="mainCharacter" height="200px">
+                    <input type="text" id="user" value="User" readonly>
+                    <label for="shoots">Tiros restantes</label>
+                    <input type="text" id="shoots" value="0" class="inputGame" readonly>
+                </div>
+            </form>
+        </div>
+    </main>
+    <footer>
+
+    </footer>
     <script src="./js/registro.js"></script>
     <script src="./js/juego.js"></script>
 </body>
