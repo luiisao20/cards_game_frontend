@@ -17,6 +17,12 @@ var size;
 var imagesRandom = []
 var numberImages;
 var numberTraps;
+var arrayIds = [];
+var arrayIdsTrap = [];
+var imagesIds = new Object();
+var imagePrint;
+var imagesPrint = [];
+var clicks = 0;
 
 /**
  * Rellena el formulario con los datos obtenidos en el getDatosUsuario()
@@ -58,32 +64,60 @@ function getRandomInt(max) {
 }
 
 /**
+ * Esta funcion asigna a cada imagen un dos ids para poder revelar
+ */
+
+function insertarImgsRandom(){
+    let items = document.getElementsByClassName('containerItem')
+
+    while (arrayIds.length < numberImages * 2){
+        let index = getRandomInt(items.length);
+        if(!arrayIds.includes(index)){
+            arrayIds.push(index)
+        }
+    }
+
+    for (let i = 0; i < arrayIds.length; i++) {
+        const key = imagesRandom[i];
+        const value = arrayIds[i]
+        if(Object.keys(imagesIds).length == numberImages){
+            let index = i - numberImages
+            const key = imagesRandom[index];
+            imagesIds[key].push(value.toString());
+        } else {
+            imagesIds[key] = [value.toString()]
+        }
+    }
+    console.log(imagesIds);
+}
+
+/**
  * Creamos el panel del juego segun el numero de cartas elegidas
  */
 function crearPanel(){
     document.getElementById('game').style.gridTemplateColumns = "repeat("+cards+", 1fr)";
     document.getElementById('game').style.gridTemplateRows = "repeat("+cards+", 1fr)";
 
-    let items = '';
+    let items = [];
     for (let index = 0; index < (parseInt(cards)*parseInt(cards)); index++) {
-        items += `<div class="containerItem animate__animated " id="${index + 1}"></div>`
+        items += `<div class="containerItem animate__animated " id="${index}"></div>`
     }
     document.getElementById('game').innerHTML = items;
 
     let itemsNew = document.getElementsByClassName('containerItem');
 
     if (cards == 5){
-        // numberTraps = 3;
+        numberTraps = 3;
         numberImages = 11;
         size = '75px';
         heightImage = '65px';
     } else if (cards == 4){
-        // numberTraps = 2;
+        numberTraps = 2;
         numberImages = 7;
         size = '100px';
         heightImage = '90px';
     } else if (cards == 3){
-        // numberTraps = 2;
+        numberTraps = 2;
         numberImages = 4;
         size = '125px';
         heightImage = '115px';
@@ -95,13 +129,23 @@ function crearPanel(){
 
     // Se escogen las imágenes aleatorias para el juego
     while(imagesRandom.length < numberImages){
-        let image = images[getRandomInt(images.length)];
-        if (!imagesRandom.includes(image)){
-            imagesRandom.push(image);
+        let index = images[getRandomInt(images.length)];
+        if (!imagesRandom.includes(index)){
+            imagesRandom.push(index);
         }
     }
+    insertarImgsRandom();
+}
 
-    console.log(imagesRandom);
+function hasDuplicates(array) {
+    for (let i = 0; i < array.length; i++) {
+        for (let j = i + 1; j < array.length; j++) {
+            if (array[i] === array[j]) {
+            return true; // If a duplicate is found, return true
+            }
+        }
+    }
+    return false; // If no duplicates are found, return false
 }
 
 /**
@@ -129,28 +173,48 @@ function chooseCard(event){
     setTimeout(()=>{
         item.classList.remove('animate__flipInY');
         item.classList.remove('animate__flipOutY');
+
+        // Printea una imagen de acuerdo al id clickeado
+        let imagePrint = ''
         
-        let index = getRandomInt(imagesRandom.length)
-        item.classList.add('animate__flipInY')
-        item.innerHTML = `<img src="${imagesRandom[index]}" alt="card" height="${heightImage}">`;
-        console.log(item.id);
+        for (let key in imagesIds){
+            if (imagesIds[key].includes(item.id)){
+                imagePrint = key;
+            }
+        }
+        
+        item.classList.add('animate__flipInY');
+        item.innerHTML = `<img src="${imagePrint}" alt="card" height="${heightImage}">`;
         setTimeout(()=>{
             item.classList.remove('animate__flipInY');
             item.classList.add('animate__flipOutY');
         }, 2000);
     }, 1000)
+    imagesPrint.push(imagePrint);
+    console.log(imagesPrint);
+    
+    let duplicates = hasDuplicates(imagesPrint)
 
+    if (duplicates){
+        console.log('Conseguido');
+        return false
+    }
     // Voltear carta boca abajo y borrar imagen
     setTimeout(()=>{
         item.classList.remove('animate__flipOutY');
         item.classList.add('animate__flipInY');
         item.innerHTML = ''
+        clicks += 1
+        console.log('clicks = ', clicks);
+        if (clicks == 2) imagesPrint = [];
+        console.log(imagesPrint);
     }, 4000)
+    
 }
 
 /**
  * Inicia los eventos del juego
- */
+*/
 function iniciandoEventosDelJuego(){
     const items = document.getElementsByClassName('containerItem');
 
