@@ -15,10 +15,11 @@ var imagesTrap = [
 var heightImage;
 var size;
 var imagesRandom;
+var imagesTrapRandom;
 var numberImages;
 var numberTraps;
 var arrayIds;
-var arrayIdsTrap = [];
+var arrayIdsTrap;
 var imagesIds;
 var imagePrint;
 var imagesPrint = [];
@@ -27,6 +28,9 @@ var duplicates;
 var idsCorrect = [];
 var score;
 var shootsValue;
+var imagesTrapsIds;
+var trapOn;
+var keyObj;
 
 /**
  * Rellena el formulario con los datos obtenidos en el getDatosUsuario()
@@ -36,7 +40,6 @@ function rellenarFormulario(){
     document.getElementById('user').value = `@ ${userName}`;
 
     // Definiendo la cantidad de tiros segun la dificultad y el numero de cartas
-
     const shoots = {
         3: {
             1: 18,
@@ -70,13 +73,41 @@ function getRandomInt(max) {
 }
 
 /**
+ * Esta función retorna las imágenes con Ids predeterminados
+ * @param {Array} array Lista de Ids a ser asignados
+ * @param {Array} images Lista de imágenes a ser asignadas Ids
+ * @param {number} number Numero de imágenes
+ * @returns Retorna un objeto, las claves son las rutas a las imágenes
+ * y cada ruta tiene un Id (si se trata de cartas trampa) o dos Ids 
+ * (si se trata de imágenes de juego)
+ */
+function getIdswithImages(array, images, number) {
+    let imgIds = new Object();
+
+    for (let i = 0; i < array.length; i++) {
+        const key = images[i];
+        const value = array[i]
+        if(Object.keys(imgIds).length == number){
+            let index = i - number
+            const key = images[index];
+            imgIds[key].push(value.toString());
+        } else {
+            imgIds[key] = [value.toString()]
+        }
+    }
+    return imgIds
+}
+
+/**
  * Esta funcion asigna a cada imagen dos ids para poder revelar
  */
 
 function insertarImgsRandom(){
     let items = document.getElementsByClassName('containerItem')
-    imagesIds = new Object();
     arrayIds = [];
+    arrayIdsTrap = [];
+    imagesIds = new Object();
+    imagesTrapsIds = new Object();
 
     while (arrayIds.length < numberImages * 2){
         let index = getRandomInt(items.length);
@@ -85,18 +116,18 @@ function insertarImgsRandom(){
         }
     }
 
-    for (let i = 0; i < arrayIds.length; i++) {
-        const key = imagesRandom[i];
-        const value = arrayIds[i]
-        if(Object.keys(imagesIds).length == numberImages){
-            let index = i - numberImages
-            const key = imagesRandom[index];
-            imagesIds[key].push(value.toString());
-        } else {
-            imagesIds[key] = [value.toString()]
+    while (arrayIdsTrap.length < numberTraps){
+        let index = getRandomInt(items.length);
+        if(!arrayIds.includes(index)){
+            if(!arrayIdsTrap.includes(index)) arrayIdsTrap.push(index)
         }
     }
+
+    imagesIds = getIdswithImages(arrayIds, imagesRandom, numberImages);
+    imagesTrapsIds = getIdswithImages(arrayIdsTrap, imagesTrapRandom, numberTraps);
+
     console.log(imagesIds);
+    console.log(imagesTrapsIds);
 }
 
 /**
@@ -125,7 +156,7 @@ function crearPanel(){
         size = '100px';
         heightImage = '90px';
     } else if (cards == 3){
-        numberTraps = 2;
+        numberTraps = 1;
         numberImages = 4;
         size = '125px';
         heightImage = '115px';
@@ -141,6 +172,13 @@ function crearPanel(){
         let index = images[getRandomInt(images.length)];
         if (!imagesRandom.includes(index)){
             imagesRandom.push(index);
+        }
+    }
+    imagesTrapRandom = [];
+    while(imagesTrapRandom.length < numberTraps){
+        let index = imagesTrap[getRandomInt(imagesTrap.length)];
+        if (!imagesTrapRandom.includes(index)){
+            imagesTrapRandom.push(index);
         }
     }
     insertarImgsRandom();
@@ -199,6 +237,18 @@ function showPlayagain(textAdv){
     
 }
 
+function showTrap() {
+    console.log('Valiste verga xd');
+    clicks = 0;
+    console.log(imagesPrint);
+    if (imagesPrint[0] == './img/Tsukoyomi.png'){
+        console.log('Tsukoyomi!!!');
+    } else if (imagesPrint[0] == './img/Senju.png'){
+        console.log('Senju!!!');
+    } else if (imagesPrint[0] == './img/Makengyou.png'){
+        console.log('Makengyou!!!');
+    }
+}
 
 /**
  * Empezamos a escoger la carta y animamos
@@ -218,19 +268,27 @@ function chooseCard(event){
     console.log(idsCorrect);
     // Voltear carta boca arriba y mostrar imagen
     item.classList.add('animate__flipOutY');
+    trapOn = false;
     setTimeout(()=>{
         item.classList.remove('animate__flipInY');
         item.classList.remove('animate__flipOutY');
-
         // Printea una imagen de acuerdo al id clickeado
         let imagePrint = '';
         clicks += 1;
         console.log('clicks = ', clicks);
-        for (let key in imagesIds){
-            if (imagesIds[key].includes(item.id)){
-                imagePrint = key;
+        for (keyObj in imagesIds){
+            if (imagesIds[keyObj].includes(item.id)){
+                imagePrint = keyObj;
+                trapOn = false;
             }
         }
+        for (keyObj in imagesTrapsIds){
+            if (imagesTrapsIds[keyObj].includes(item.id)){
+                imagePrint = keyObj;
+                trapOn = true;
+            }
+        }
+
         imagesPrint.push(imagePrint);
         duplicates = hasDuplicates(imagesPrint);
         
@@ -247,6 +305,7 @@ function chooseCard(event){
         item.classList.remove('animate__flipOutY');
         item.classList.add('animate__flipInY');
         console.log(idsCorrect);
+        console.log(trapOn);
         if (clicks >= 2 && duplicates){
             console.log('conseguido');
             for (let id of idsCorrect){
@@ -256,6 +315,13 @@ function chooseCard(event){
                 container.removeEventListener('click', chooseCard)
             }
             score.value = parseInt(score.value) + 1;
+        } else if (trapOn){
+            console.log(keyObj);
+            if(imagesTrapRandom.includes(keyObj)){
+                showTrap();
+            } else{
+                item.innerHTML = '';
+            }
         }
         else{
             clicks = 0;
