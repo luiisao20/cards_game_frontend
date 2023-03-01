@@ -14,15 +14,19 @@ var imagesTrap = [
 ]
 var heightImage;
 var size;
-var imagesRandom = []
+var imagesRandom;
 var numberImages;
 var numberTraps;
-var arrayIds = [];
+var arrayIds;
 var arrayIdsTrap = [];
-var imagesIds = new Object();
+var imagesIds;
 var imagePrint;
 var imagesPrint = [];
 var clicks = 0;
+var duplicates;
+var idsCorrect = [];
+var score;
+var shootsValue;
 
 /**
  * Rellena el formulario con los datos obtenidos en el getDatosUsuario()
@@ -35,23 +39,25 @@ function rellenarFormulario(){
 
     const shoots = {
         3: {
-            1: 14,
-            2: 12,
-            3: 10,
+            1: 18,
+            2: 16,
+            3: 14,
         },
         4: {
-            1: 16,
-            2: 14,
-            3: 12,
+            1: 20,
+            2: 18,
+            3: 16,
         },
         5: {
-            1: 26,
-            2: 24,
-            3: 22,
+            1: 30,
+            2: 28,
+            3: 26,
         },
     };
 
-    document.getElementById('shoots').value = shoots[cards][dificulty]
+    shootsValue = shoots[cards][dificulty]
+
+    document.getElementById('shoots').value = shootsValue
 }
 
 /**
@@ -64,11 +70,13 @@ function getRandomInt(max) {
 }
 
 /**
- * Esta funcion asigna a cada imagen un dos ids para poder revelar
+ * Esta funcion asigna a cada imagen dos ids para poder revelar
  */
 
 function insertarImgsRandom(){
     let items = document.getElementsByClassName('containerItem')
+    imagesIds = new Object();
+    arrayIds = [];
 
     while (arrayIds.length < numberImages * 2){
         let index = getRandomInt(items.length);
@@ -128,6 +136,7 @@ function crearPanel(){
     }
 
     // Se escogen las imágenes aleatorias para el juego
+    imagesRandom = [];
     while(imagesRandom.length < numberImages){
         let index = images[getRandomInt(images.length)];
         if (!imagesRandom.includes(index)){
@@ -137,16 +146,59 @@ function crearPanel(){
     insertarImgsRandom();
 }
 
+/**
+ * Encuentra si hay duplicados en el array de imágenes printeadas
+ * @param {Array} array de imagenes printeadas
+ * @returns true si hay duplicados y false si no los hay
+ */
 function hasDuplicates(array) {
     for (let i = 0; i < array.length; i++) {
         for (let j = i + 1; j < array.length; j++) {
             if (array[i] === array[j]) {
-            return true; // If a duplicate is found, return true
+            return true;
             }
         }
     }
-    return false; // If no duplicates are found, return false
+    return false;
 }
+
+/**
+ * Muestra el aviso de que el juego ha terminado y reinicia todo
+ */
+function showPlayagain(textAdv){
+    advertising = document.getElementById('advertising');
+    document.getElementById('tittle').innerText = textAdv
+    // Animacion de entrada
+    advertising.classList.remove('animate__rotateOutUpRight');
+    advertising.classList.add('animate__rotateInDownLeft');
+    advertising.style.opacity = '1';
+    // Oculta el panel de juego
+    let panelGame = document.getElementById('panelGame');
+    panelGame.style.transition = 'opacity 0.5s ease';
+    panelGame.style.opacity = '0.2';
+    button = document.getElementById('playAgain')
+    // Evento para dar click en el boton y reiniciar el juego
+    button.addEventListener('click', e=>{
+        advertising.classList.remove('animate__rotateInDownLeft');
+        advertising.classList.add('animate__rotateOutUpRight');
+        panelGame.style.opacity = '1';
+        const items = document.getElementsByClassName('containerItem');
+
+        for(let item of items){
+            item.addEventListener('click', chooseCard);
+        }
+        document.getElementById('score').value = 0;
+        document.getElementById('shoots').value = shootsValue;
+    })
+
+    let items = document.getElementsByClassName('containerItem')
+    for (let item in items){
+        item.innerHTML = ''
+    }
+    crearPanel();
+    
+}
+
 
 /**
  * Empezamos a escoger la carta y animamos
@@ -155,19 +207,15 @@ function hasDuplicates(array) {
 function chooseCard(event){
     // Si ya no hay más tiros, no puedes seguir jugando
     let shoots = document.getElementById('shoots');
-    if(shoots.value <= 0){
-        console.log('juego terminado');
-        const items = document.getElementsByClassName('containerItem');
-        for (let item of items) {
-            item.removeEventListener('click', chooseCard);
-        }
-        return false
-    }
+    score = document.getElementById('score')
+
+    if (clicks >= 2) clicks = 0;
 
     // Si tienes tiradas, sigues jugando
     let item = event.target;
     shoots.value = parseInt(shoots.value) - 1;
-
+    idsCorrect.push(item.id)
+    console.log(idsCorrect);
     // Voltear carta boca arriba y mostrar imagen
     item.classList.add('animate__flipOutY');
     setTimeout(()=>{
@@ -175,13 +223,16 @@ function chooseCard(event){
         item.classList.remove('animate__flipOutY');
 
         // Printea una imagen de acuerdo al id clickeado
-        let imagePrint = ''
-        
+        let imagePrint = '';
+        clicks += 1;
+        console.log('clicks = ', clicks);
         for (let key in imagesIds){
             if (imagesIds[key].includes(item.id)){
                 imagePrint = key;
             }
         }
+        imagesPrint.push(imagePrint);
+        duplicates = hasDuplicates(imagesPrint);
         
         item.classList.add('animate__flipInY');
         item.innerHTML = `<img src="${imagePrint}" alt="card" height="${heightImage}">`;
@@ -190,26 +241,43 @@ function chooseCard(event){
             item.classList.add('animate__flipOutY');
         }, 2000);
     }, 1000)
-    imagesPrint.push(imagePrint);
-    console.log(imagesPrint);
     
-    let duplicates = hasDuplicates(imagesPrint)
-
-    if (duplicates){
-        console.log('Conseguido');
-        return false
-    }
     // Voltear carta boca abajo y borrar imagen
     setTimeout(()=>{
         item.classList.remove('animate__flipOutY');
         item.classList.add('animate__flipInY');
-        item.innerHTML = ''
-        clicks += 1
-        console.log('clicks = ', clicks);
-        if (clicks == 2) imagesPrint = [];
-        console.log(imagesPrint);
+        console.log(idsCorrect);
+        if (clicks >= 2 && duplicates){
+            console.log('conseguido');
+            for (let id of idsCorrect){
+                let container = document.getElementById(id)
+                console.log(id);
+                container.innerHTML = `<img src="${imagesPrint[1]}" alt="card" height="${heightImage}">`;
+                container.removeEventListener('click', chooseCard)
+            }
+            score.value = parseInt(score.value) + 1;
+        }
+        else{
+            clicks = 0;
+            item.innerHTML = '';
+        }
+        imagesPrint = [];
+        idsCorrect = [];
+        setTimeout(()=>{
+
+            if(shoots.value <= 0 || score.value >= numberImages * 2){
+                console.log('juego terminado');
+                const items = document.getElementsByClassName('containerItem');
+                for (let item of items) {
+                    item.removeEventListener('click', chooseCard);
+                }
+                if (shoots.value <= 0) textAdv = 'Has perdido!';
+                else if (score.value >= numberImages * 2) textAdv = 'Has ganado!';
+                showPlayagain(textAdv);
+                return false
+            }
+        }, 2000)
     }, 4000)
-    
 }
 
 /**
