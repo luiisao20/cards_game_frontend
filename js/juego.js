@@ -29,8 +29,9 @@ var idsCorrect = [];
 var score;
 var shootsValue;
 var imagesTrapsIds;
-var trapOn;
 var keyObj;
+var trapOption;
+var imagesTrapArray = [];
 
 /**
  * Rellena el formulario con los datos obtenidos en el getDatosUsuario()
@@ -101,7 +102,6 @@ function getIdswithImages(array, images, number) {
 /**
  * Esta funcion asigna a cada imagen dos ids para poder revelar
  */
-
 function insertarImgsRandom(){
     let items = document.getElementsByClassName('containerItem')
     arrayIds = [];
@@ -122,7 +122,6 @@ function insertarImgsRandom(){
             if(!arrayIdsTrap.includes(index)) arrayIdsTrap.push(index)
         }
     }
-
     imagesIds = getIdswithImages(arrayIds, imagesRandom, numberImages);
     imagesTrapsIds = getIdswithImages(arrayIdsTrap, imagesTrapRandom, numberTraps);
 
@@ -139,7 +138,7 @@ function crearPanel(){
 
     let items = [];
     for (let index = 0; index < (parseInt(cards)*parseInt(cards)); index++) {
-        items += `<div class="containerItem animate__animated " id="${index}"></div>`
+        items += `<div class="containerItem " id="${index}"></div>`
     }
     document.getElementById('game').innerHTML = items;
 
@@ -190,64 +189,111 @@ function crearPanel(){
  * @returns true si hay duplicados y false si no los hay
  */
 function hasDuplicates(array) {
-    for (let i = 0; i < array.length; i++) {
-        for (let j = i + 1; j < array.length; j++) {
-            if (array[i] === array[j]) {
-            return true;
+    if (array.length > 1){
+        for (let i = 0; i < array.length; i++) {
+            for (let j = i + 1; j < array.length; j++) {
+                if (array[i] === array[j]) {
+                return true;
+                }
             }
         }
     }
     return false;
 }
 
-/**
- * Muestra el aviso de que el juego ha terminado y reinicia todo
- */
-function showPlayagain(textAdv){
-    advertising = document.getElementById('advertising');
-    document.getElementById('tittle').innerText = textAdv
-    // Animacion de entrada
-    advertising.classList.remove('animate__rotateOutUpRight');
-    advertising.classList.add('animate__rotateInDownLeft');
-    advertising.style.opacity = '1';
-    // Oculta el panel de juego
-    let panelGame = document.getElementById('panelGame');
-    panelGame.style.transition = 'opacity 0.5s ease';
-    panelGame.style.opacity = '0.2';
-    button = document.getElementById('playAgain')
-    // Evento para dar click en el boton y reiniciar el juego
+function trapFunction(button){
     button.addEventListener('click', e=>{
-        advertising.classList.remove('animate__rotateInDownLeft');
-        advertising.classList.add('animate__rotateOutUpRight');
-        panelGame.style.opacity = '1';
+        clicks = 0;
         const items = document.getElementsByClassName('containerItem');
-
+        
         for(let item of items){
             item.addEventListener('click', chooseCard);
         }
-        document.getElementById('score').value = 0;
-        document.getElementById('shoots').value = shootsValue;
-    })
+        animateCSS('advertising', 'animate__fadeOutDown').then(()=>{
+            let panelGame = document.getElementById('panelGame');
+            panelGame.style.transition = 'opacity 0.5s ease';
+            advertising.style.opacity = '0';
+            panelGame.style.opacity = '1';
 
-    let items = document.getElementsByClassName('containerItem')
-    for (let item in items){
-        item.innerHTML = ''
-    }
-    crearPanel();
-    
+            if (trapOption == 1){
+                console.log('Tsukoyomi!!!');
+            } else if (trapOption == 2){
+                console.log('Senju!!!');
+            } else if (trapOption == 3){
+                console.log('Makengyou!!!');
+            }
+        })
+    })
 }
 
-function showTrap() {
+/**
+ * Muestra el aviso de que el juego ha terminado y reinicia todo
+*/
+function showPlayagain(textAdv, trap){
+    advertising = document.getElementById('advertising');
+    document.getElementById('tittle').innerText = textAdv;
+    
+    // Animacion de entrada
+    animateCSS('advertising', 'animate__fadeInDown').then(()=>{
+        advertising.style.opacity = '1';
+        let panelGame = document.getElementById('panelGame');
+        panelGame.style.transition = 'opacity 0.5s ease';
+        panelGame.style.opacity = '0.2';
+    })
+    if (trap) {
+        document.getElementById('playAgain').innerText = 'OK'
+        trapFunction(document.getElementById('playAgain'))
+    }else{
+        // Oculta el panel de juego
+        button = document.getElementById('playAgain');
+        button.innerText = 'Play again?'
+        // Evento para dar click en el boton y reiniciar el juego
+        button.addEventListener('click', event=>{
+            animateCSS('advertising', 'animate__fadeOutDown').then(()=>{
+                panelGame.style.transition = 'opacity 0.5s ease';
+                advertising.style.opacity = '0';
+                panelGame.style.opacity = '1';
+                location.reload();
+            })
+        })    
+    }
+}
+
+function showTrap(imageTrapPrint) {
     console.log('Valiste verga xd');
     clicks = 0;
-    console.log(imagesPrint);
-    if (imagesPrint[0] == './img/Tsukoyomi.png'){
-        console.log('Tsukoyomi!!!');
-    } else if (imagesPrint[0] == './img/Senju.png'){
-        console.log('Senju!!!');
-    } else if (imagesPrint[0] == './img/Makengyou.png'){
-        console.log('Makengyou!!!');
+    imagesTrapArray = [];
+    if (imageTrapPrint == './img/Tsukoyomi.png'){
+        trapOption = 1;
+        showPlayagain('Has sido devorado por el Tsukoyomi!', true)
+    } else if (imageTrapPrint == './img/Senju.png'){
+        trapOption = 2;
+        showPlayagain('Has sido salvado por el sello!', true)
+    } else if (imageTrapPrint == './img/Makengyou.png'){
+        trapOption = 3;
+        showPlayagain('Caíste en un genjutsu por el Makenyou Saringan!', true)
     }
+}
+
+/**
+ * Esta función ingresa animación a un elemento y la elimina enseguida
+ * @param {HTMLElement} element 
+ * @param {String} animation Animación sacada de animate.style
+ * @param {String} prefix Prefijo para la clase de animación
+ * @returns retorna la respuesta de la promesa
+ */
+function animateCSS(element, animation, prefix = 'animate__'){
+    return new Promise((resolve, reject) => {
+        const animationName = `${animation}`;
+        const node = document.getElementById(element);
+        node.classList.add(`${prefix}animated`, animationName);
+        function handleAnimationEnd(event) {
+            event.stopPropagation();
+            node.classList.remove(`${prefix}animated`, animationName);
+            resolve('Animation ended');
+        }
+        node.addEventListener('animationend', handleAnimationEnd, {once: true});
+    });
 }
 
 /**
@@ -257,93 +303,101 @@ function showTrap() {
 function chooseCard(event){
     // Si ya no hay más tiros, no puedes seguir jugando
     let shoots = document.getElementById('shoots');
-    score = document.getElementById('score')
-
-    if (clicks >= 2) clicks = 0;
-
-    // Si tienes tiradas, sigues jugando
-    let item = event.target;
-    shoots.value = parseInt(shoots.value) - 1;
-    idsCorrect.push(item.id)
-    console.log(idsCorrect);
-    // Voltear carta boca arriba y mostrar imagen
-    item.classList.add('animate__flipOutY');
-    trapOn = false;
-    setTimeout(()=>{
-        item.classList.remove('animate__flipInY');
-        item.classList.remove('animate__flipOutY');
-        // Printea una imagen de acuerdo al id clickeado
-        let imagePrint = '';
-        clicks += 1;
-        console.log('clicks = ', clicks);
-        for (keyObj in imagesIds){
-            if (imagesIds[keyObj].includes(item.id)){
-                imagePrint = keyObj;
-                trapOn = false;
-            }
-        }
-        for (keyObj in imagesTrapsIds){
-            if (imagesTrapsIds[keyObj].includes(item.id)){
-                imagePrint = keyObj;
-                trapOn = true;
-            }
-        }
-
-        imagesPrint.push(imagePrint);
-        duplicates = hasDuplicates(imagesPrint);
-        
-        item.classList.add('animate__flipInY');
-        item.innerHTML = `<img src="${imagePrint}" alt="card" height="${heightImage}">`;
-        setTimeout(()=>{
-            item.classList.remove('animate__flipInY');
-            item.classList.add('animate__flipOutY');
-        }, 2000);
-    }, 1000)
-    
-    // Voltear carta boca abajo y borrar imagen
-    setTimeout(()=>{
-        item.classList.remove('animate__flipOutY');
-        item.classList.add('animate__flipInY');
-        console.log(idsCorrect);
-        console.log(trapOn);
-        if (clicks >= 2 && duplicates){
-            console.log('conseguido');
-            for (let id of idsCorrect){
-                let container = document.getElementById(id)
-                console.log(id);
-                container.innerHTML = `<img src="${imagesPrint[1]}" alt="card" height="${heightImage}">`;
-                container.removeEventListener('click', chooseCard)
-            }
-            score.value = parseInt(score.value) + 1;
-        } else if (trapOn){
-            console.log(keyObj);
-            if(imagesTrapRandom.includes(keyObj)){
-                showTrap();
-            } else{
-                item.innerHTML = '';
-            }
-        }
-        else{
-            clicks = 0;
-            item.innerHTML = '';
-        }
+    score = document.getElementById('score');
+    console.log('hola', clicks);
+    if (clicks == 0 || clicks == 1 && !hasDuplicates(arrayIds)){
         imagesPrint = [];
         idsCorrect = [];
-        setTimeout(()=>{
-
-            if(shoots.value <= 0 || score.value >= numberImages * 2){
-                console.log('juego terminado');
-                const items = document.getElementsByClassName('containerItem');
-                for (let item of items) {
-                    item.removeEventListener('click', chooseCard);
+        clicks++
+        // Si tienes tiradas, sigues jugando
+        let item = event.target;
+        shoots.value = parseInt(shoots.value) - 1;
+        idsCorrect.push(item.id)
+        console.log(idsCorrect);
+        duplicates = false;
+        let imagePrint = '';
+        let imageTrapPrint = '';
+        // Voltear carta boca arriba y mostrar imagen
+        animateCSS(item.id, 'animate__flipOutY').then(()=>{
+            for (keyObj in imagesIds){
+                if (imagesIds[keyObj].includes(item.id)){
+                    imagePrint = keyObj;
+                    item.innerHTML = `<img src="${imagePrint}" alt="card" height="${heightImage}">`;
                 }
-                if (shoots.value <= 0) textAdv = 'Has perdido!';
-                else if (score.value >= numberImages * 2) textAdv = 'Has ganado!';
-                showPlayagain(textAdv);
+            }
+            imagesPrint.push(imagePrint)
+            for (keyObj in imagesTrapsIds){
+                if (imagesTrapsIds[keyObj].includes(item.id)){
+                    imageTrapPrint = keyObj;
+                    item.innerHTML = `<img src="${imageTrapPrint}" alt="card" height="${heightImage}">`;
+                    imagesTrapArray.push(imageTrapPrint)
+                }
+            }
+            if (imagesTrapArray.includes(imageTrapPrint)){
+                animateCSS(item.id, 'animate__flipInY').then(() =>{
+                    clicks--
+                    imagesTrapArray = [];
+                    const items = document.getElementsByClassName('containerItem')
+
+                    for (let item of items) {
+                        item.removeEventListener('click', chooseCard)
+                    }
+                    showTrap(imageTrapPrint)
+                })
                 return false
             }
-        }, 2000)
-    }, 4000)
+            console.log(imagesPrint);
+            console.log('clicks = ', clicks);
+            // setTimeout(hideCard[3000, item])
+            hideCard(item)
+        });
+    }
+}
+
+/**
+ * Esta función voltea boca abajo la carta y según la puntuación y los 
+ * tiros restantes alerta de que el juego ha terminado o no
+ * @param {HTMLElement} item elemento que está siendo volteado
+ */
+function hideCard(item){
+    animateCSS(item.id, 'animate__flipInY').then(()=>{
+        duplicates = hasDuplicates(imagesPrint);
+        if (duplicates){
+            clicks--
+            score = document.getElementById('score')
+            score.value = parseInt(score.value) + 1;
+            if (score.value == numberImages * 2){
+                
+                const items = document.getElementsByClassName('containerItem')
+
+                for (let item of items) {
+                    item.removeEventListener('click', chooseCard)
+                }
+                showPlayagain('Has ganado!', false);
+            }
+            return false;
+        }
+        if(shoots.value < 1 || score.value == numberImages * 2){
+            clicks--
+            console.log('juego terminado');
+            
+            const items = document.getElementsByClassName('containerItem')
+
+            for (let item of items) {
+                item.removeEventListener('click', chooseCard)
+            }
+            if(shoots.value < 1) textAdv = 'Has perdido!';
+            else textAdv = 'Has ganado!'
+            showPlayagain(textAdv, false);
+            return false
+        }
+        animateCSS(item.id, 'animate__flipOutY').then(()=>{
+            animateCSS(item.id, 'animate__flipInY');
+            item.innerHTML = '';
+            console.log('jelou');
+            clicks--
+        })
+    })
 }
 
 /**
