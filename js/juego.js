@@ -1,3 +1,9 @@
+/**
+ * JS del registro del usuario, guardar en el session storage y el historico en el local storage
+ * @author LuisBravo <bravo.luis.1995@gmail.com>
+ * {@link https://github.com/luiisao20/CSS_HTML_JS}
+ */
+
 var images = [
     './img/Bee.jpeg', './img/Edo Tensei.jpeg', './img/Gai sensei.jpeg', 
     './img/Hashirama.png', './img/Hinata.png', './img/Iruka.png',
@@ -32,9 +38,13 @@ var imagesTrapsIds;
 var keyObj;
 var trapOption;
 var imagesTrapArray = [];
+var trapOn;
+var tmpo;
 
 /**
  * Rellena el formulario con los datos obtenidos en el getDatosUsuario()
+ * y asigna el número de tiros según la dificultad escogida y también el 
+ * tiempo para revelar la carta.
  */
 function rellenarFormulario(){
     document.getElementById('mainCharacter').src = character;
@@ -58,6 +68,10 @@ function rellenarFormulario(){
             3: 26,
         },
     };
+
+    if (dificulty == 1) tmpo = 3000;
+    else if (dificulty == 2) tmpo = 2000;
+    else if (dificulty == 3) tmpo = 1000;
 
     shootsValue = shoots[cards][dificulty]
 
@@ -100,7 +114,8 @@ function getIdswithImages(array, images, number) {
 }
 
 /**
- * Esta funcion asigna a cada imagen dos ids para poder revelar
+ * Esta función escoge imágenes aleatorias tanto para el juego como para
+ * las trampas, luego asigna ids con la función <getIdswithImages()>
  */
 function insertarImgsRandom(){
     let items = document.getElementsByClassName('containerItem')
@@ -201,34 +216,49 @@ function hasDuplicates(array) {
     return false;
 }
 
+/**
+ * La función de la trampa realiza las acciones asignadas a cada trampa 
+ * despúes de clickear el "OK" y cuando la promesa returne la respuesta
+ * @param {HTMLElement} button Elemento del botón requerido
+ */
 function trapFunction(button){
     button.addEventListener('click', e=>{
-        clicks = 0;
-        const items = document.getElementsByClassName('containerItem');
-        
-        for(let item of items){
-            item.addEventListener('click', chooseCard);
-        }
         animateCSS('advertising', 'animate__fadeOutDown').then(()=>{
             let panelGame = document.getElementById('panelGame');
             panelGame.style.transition = 'opacity 0.5s ease';
             advertising.style.opacity = '0';
             panelGame.style.opacity = '1';
-
+            clicks = 0;
+            
+            // Según la trampa, se hacen ciertas cosas
             if (trapOption == 1){
                 console.log('Tsukoyomi!!!');
+                crearPanel();
+                iniciandoEventosDelJuego();
             } else if (trapOption == 2){
-                console.log('Senju!!!');
+                let shoots = document.getElementById('shoots')
+                console.log(shoots.value);
+                shoots.value = parseInt(shoots.value) + 6;
+                iniciandoEventosDelJuego();
             } else if (trapOption == 3){
                 console.log('Makengyou!!!');
+                console.log(imagesPrint);
+                const items = document.getElementsByClassName('containerItem')
+                for (let item of items){
+                    showCard(item, false);
+                }
+                iniciandoEventosDelJuego();
+                document.getElementById('shoots').value = shootsValue
             }
         })
     })
 }
 
 /**
- * Muestra el aviso de que el juego ha terminado y reinicia todo
-*/
+ * Esta función muestra el aviso de juego acabado o si caíste en una trampa
+ * @param {String} textAdv Texto de aviso que se muestra en la ventana emergente
+ * @param {Boolean} trap Valor booleano que avisa si la trampa está activada o no
+ */
 function showPlayagain(textAdv, trap){
     advertising = document.getElementById('advertising');
     document.getElementById('tittle').innerText = textAdv;
@@ -259,19 +289,22 @@ function showPlayagain(textAdv, trap){
     }
 }
 
+/**
+ * FUnción que según la carta trampa realiza una u otra acción
+ * @param {String} imageTrapPrint Ruta relativa de la imagen trampa
+ */
 function showTrap(imageTrapPrint) {
-    console.log('Valiste verga xd');
     clicks = 0;
     imagesTrapArray = [];
     if (imageTrapPrint == './img/Tsukoyomi.png'){
         trapOption = 1;
-        showPlayagain('Has sido devorado por el Tsukoyomi!', true)
+        showPlayagain('¡Has sido devorado por el Tsukoyomi! Las cartas se han revuelto.', true)
     } else if (imageTrapPrint == './img/Senju.png'){
         trapOption = 2;
-        showPlayagain('Has sido salvado por el sello!', true)
+        showPlayagain('¡Has sido salvado por el sello! Tienes más tiros.', true)
     } else if (imageTrapPrint == './img/Makengyou.png'){
         trapOption = 3;
-        showPlayagain('Caíste en un genjutsu por el Makenyou Saringan!', true)
+        showPlayagain('¡Desbloqueaste el Makengyou! Todas las cartas se voltearán, pero inicias otra vez.', true)
     }
 }
 
@@ -302,101 +335,118 @@ function animateCSS(element, animation, prefix = 'animate__'){
  */
 function chooseCard(event){
     // Si ya no hay más tiros, no puedes seguir jugando
-    let shoots = document.getElementById('shoots');
-    score = document.getElementById('score');
-    console.log('hola', clicks);
-    if (clicks == 0 || clicks == 1 && !hasDuplicates(arrayIds)){
+    if (clicks == 1 || clicks == 0){
+        let shoots = document.getElementById('shoots');
+        score = document.getElementById('score');
+        if(shoots.value < 1 || score.value == numberImages * 2){
+            clicks--
+            console.log('juego terminado');
+            
+            const items = document.getElementsByClassName('containerItem')
+    
+            for (let item of items) {
+                item.removeEventListener('click', chooseCard)
+            }
+            if(shoots.value < 1) textAdv = 'Has perdido!';
+            else textAdv = 'Has ganado!';
+            showPlayagain(textAdv, false);
+            return false
+        }
         imagesPrint = [];
         idsCorrect = [];
         clicks++
         // Si tienes tiradas, sigues jugando
         let item = event.target;
         shoots.value = parseInt(shoots.value) - 1;
-        idsCorrect.push(item.id)
         console.log(idsCorrect);
         duplicates = false;
-        let imagePrint = '';
-        let imageTrapPrint = '';
         // Voltear carta boca arriba y mostrar imagen
-        animateCSS(item.id, 'animate__flipOutY').then(()=>{
-            for (keyObj in imagesIds){
-                if (imagesIds[keyObj].includes(item.id)){
-                    imagePrint = keyObj;
-                    item.innerHTML = `<img src="${imagePrint}" alt="card" height="${heightImage}">`;
-                }
-            }
-            imagesPrint.push(imagePrint)
-            for (keyObj in imagesTrapsIds){
-                if (imagesTrapsIds[keyObj].includes(item.id)){
-                    imageTrapPrint = keyObj;
-                    item.innerHTML = `<img src="${imageTrapPrint}" alt="card" height="${heightImage}">`;
-                    imagesTrapArray.push(imageTrapPrint)
-                }
-            }
-            if (imagesTrapArray.includes(imageTrapPrint)){
-                animateCSS(item.id, 'animate__flipInY').then(() =>{
-                    clicks--
-                    imagesTrapArray = [];
-                    const items = document.getElementsByClassName('containerItem')
-
-                    for (let item of items) {
-                        item.removeEventListener('click', chooseCard)
-                    }
-                    showTrap(imageTrapPrint)
-                })
-                return false
-            }
-            console.log(imagesPrint);
-            console.log('clicks = ', clicks);
-            // setTimeout(hideCard[3000, item])
-            hideCard(item)
-        });
+        trapOn = true;
+        showCard(item, trapOn);
     }
 }
 
 /**
- * Esta función voltea boca abajo la carta y según la puntuación y los 
- * tiros restantes alerta de que el juego ha terminado o no
- * @param {HTMLElement} item elemento que está siendo volteado
+ * Esta función voltea la carta que se ha clickeado y según el id
+ * muestra una cierta imagen
+ * @param {HTMLElement} item Elemento que se clickea
+ * @param {Boolean} trapOn Valor que indica si la carta levantada es una trampa
  */
-function hideCard(item){
-    animateCSS(item.id, 'animate__flipInY').then(()=>{
-        duplicates = hasDuplicates(imagesPrint);
-        if (duplicates){
-            clicks--
-            score = document.getElementById('score')
-            score.value = parseInt(score.value) + 1;
-            if (score.value == numberImages * 2){
-                
-                const items = document.getElementsByClassName('containerItem')
-
-                for (let item of items) {
-                    item.removeEventListener('click', chooseCard)
+function showCard(item, trapOn){
+    let imagePrint = '';
+    let imageTrapPrint = '';
+    animateCSS(item.id, 'animate__flipOutY').then(()=>{
+        for (keyObj in imagesIds){
+            if (imagesIds[keyObj].includes(item.id)){
+                imagePrint = keyObj;
+                item.innerHTML = `<img src="${imagePrint}" alt="card" height="${heightImage}">`;
+                idsCorrect.push(item.id)
+            }
+        }
+        imagesPrint.push(imagePrint)
+        for (keyObj in imagesTrapsIds){
+            if (imagesTrapsIds[keyObj].includes(item.id)){
+                imageTrapPrint = keyObj;
+                item.innerHTML = `<img src="${imageTrapPrint}" alt="card" height="${heightImage}">`;
+                imagesTrapArray.push(imageTrapPrint)
+            }
+        }
+        if (imagesTrapArray.includes(imageTrapPrint)){
+            animateCSS(item.id, 'animate__flipInY').then(() =>{
+                imagesTrapArray = [];
+                if (trapOn){
+                    const items = document.getElementsByClassName('containerItem')
+                    clicks--
+                    for (let item of items) {
+                        item.removeEventListener('click', chooseCard)
+                    }
+                    showTrap(imageTrapPrint);
+                    return false
                 }
-                showPlayagain('Has ganado!', false);
-            }
-            return false;
+            })
         }
-        if(shoots.value < 1 || score.value == numberImages * 2){
-            clicks--
-            console.log('juego terminado');
-            
-            const items = document.getElementsByClassName('containerItem')
+        // console.log(imagesPrint); Printea en consola las cartas
+        // console.log(idsCorrect); Printea en consola las cartas
+        hideCard(item, trapOn)
+    });
+}
 
-            for (let item of items) {
-                item.removeEventListener('click', chooseCard)
+/**
+ * Función que voltea la carta clickeada y según el puntaje o los tiros restantes
+ * termina o continúa el juego. Si las cartas volteadas al mismo tiempo son iguales
+ * deja volteadas las cartas
+ * @param {HTMLElement} item item clickeado
+ * @param {Boolean} trapOn Según si es V o F resta clicks
+ */
+function hideCard(item, trapOn){
+    animateCSS(item.id, 'animate__flipInY').then(()=>{
+        setTimeout(()=>{
+            duplicates = hasDuplicates(imagesPrint);
+            if (duplicates && !hasDuplicates(idsCorrect) && trapOn){
+                clicks--
+                score = document.getElementById('score')
+                score.value = parseInt(score.value) + 1;
+                if(shoots.value < 1 || score.value == numberImages * 2){
+                    clicks--
+                    console.log('juego terminado');
+                    
+                    const items = document.getElementsByClassName('containerItem')
+            
+                    for (let item of items) {
+                        item.removeEventListener('click', chooseCard)
+                    }
+                    if(shoots.value < 1) textAdv = 'Has perdido!';
+                    else textAdv = 'Has ganado!';
+                    showPlayagain(textAdv, false);
+                }
+                return false;
             }
-            if(shoots.value < 1) textAdv = 'Has perdido!';
-            else textAdv = 'Has ganado!'
-            showPlayagain(textAdv, false);
-            return false
-        }
-        animateCSS(item.id, 'animate__flipOutY').then(()=>{
-            animateCSS(item.id, 'animate__flipInY');
-            item.innerHTML = '';
-            console.log('jelou');
-            clicks--
-        })
+            animateCSS(item.id, 'animate__flipOutY').then(()=>{
+                animateCSS(item.id, 'animate__flipInY');
+                item.innerHTML = '';
+                if(trapOn) clicks--;
+            })
+        }, tmpo)
     })
 }
 
@@ -411,6 +461,7 @@ function iniciandoEventosDelJuego(){
     }
 }
 
+// Main function
 getDatosUsuario();
 
 if(!comprobacionDatosUsuario()) location = 'index.html';

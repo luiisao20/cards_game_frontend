@@ -35,27 +35,27 @@ function comprobarForm(event){
         console.log('Usario incorrecto');
         userName.focus();
         event.preventDefault();
-        error.innerText = 'Usuario incorrecto compa xd.';
+        error.innerText = 'El usuario sólo puede poseer caracteres alfanuméricos';
         showError();
         return false
     } else if (dificulty.value == '0'){
         console.log('Dificultad nula');
         event.preventDefault();
         dificulty.focus();
-        error.innerText = 'Escoge la dificultad del juego oe.';
+        error.innerText = 'Escoge la dificultad por favor';
         showError();
         return false
     } else if (cards.value == '0'){
         console.log('Cartas nulas');
         event.preventDefault();
         cards.focus();
-        error.innerText = 'Habla bien, y las cartas?';
+        error.innerText = 'Especifica el tamaño del juego';
         showError();
         return false
     } else if(characterContainer.innerText == 'Arrastra aquí tu personaje elegido'){
         console.log('Personaje nulo');
         event.preventDefault();
-        error.innerText = 'Oe escoge el personaje pelado';
+        error.innerText = 'Escoge tu personaje favorito.';
         showError();
         return false
     }
@@ -117,4 +117,5 @@ function domCargado(){
     characterContainer.addEventListener('drop', colocarCharacter)
 }
 
+// Main function
 document.addEventListener('DOMContentLoaded', domCargado);
